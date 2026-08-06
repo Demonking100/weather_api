@@ -1,37 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: rgb(255, 222, 179);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contanier {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 5px 10px 0px rgba(0, 0, 0, 0.1);
+    width: 320px;
+    text-align: center;
+}
+
+h3 {
+    color: #ffffff;
+    margin-bottom: 16px;
+    font-size: 1.4rem;
+    background-color: #2c3e50;
+    border-radius: 30px;
+}
+
+input#cityt {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease;
+    margin-bottom: 10px;
+}
+
+input#cityt:focus {
+    border-color: #f87902;
+}
+
+button#mybtn {
+    width: 100%;
+    padding: 10px;
+    background-color: #ff7300;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 5px 5px 0px #f3b786 ;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button#mybtn:hover {
+    background-color: #ffa4cf;
+}
+
+button#mybtn:active {
+    transform: scale(0.98);
+}
+
+.result {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-top: 18px;
+}
+
+.status {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    justify-content: space-between;
+    line-height: 1.4;
+}
+    </style>
 </head>
+
 <body>
     <div class="contanier">
         <h3>Weather</h3>
         <input id="cityt" type="text" name="search" placeholder="Location">
         <button id="mybtn" class="btn">Search</button>
+        <div id="result" class="result"></div>
+        <div id="status" class="status"></div>
     </div>
-    <div id="result" class="result"></div>
-    <div id="status" class="status"></div>
 
     <script>
         const input = document.getElementById('cityt')
         const btn = document.getElementById('mybtn')
-        btn.addEventListener('click',()=>{
+        btn.addEventListener('click', () => {
             getlocation();
         })
+        function weatherCondition (weathercode){
+            const conditions = {
+          0: 'Clear sky',
+          1: 'Mainly clear',
+          2: 'Partly cloudy',
+          3: 'Overcast',
+          45: 'Fog',
+          48: 'Rime fog',
+          51: 'Light drizzle',
+          53: 'Moderate drizzle',
+          55: 'Dense drizzle',
+          61: 'Slight rain',
+          63: 'Moderate rain',
+          65: 'Heavy rain',
+          71: 'Slight snow',
+          73: 'Moderate snow',
+          75: 'Heavy snow',
+          80: 'Rain showers',
+          81: 'Heavy rain showers',
+          82: 'Violent rain showers',
+          95: 'Thunderstorm',
+          96: 'Thunderstorm with hail',
+          99: 'Thunderstorm with heavy hail'
+        };
+
+        return conditions[weathercode] || 'Unknown weather';
+
+        }
         async function getlocation() {
             const location = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${input.value}`)
             const data = await location.json();
             const longi = data.results[0].longitude;
             const lati = data.results[0].latitude;
-            const display = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lati}&longitude=${longi}&current_weather=true`)
+            const display = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lati}&longitude=${longi}&current_weather=true&current=relative_humidity_2m,apparent_temperature`)
             const weatherData = await display.json();
-            const status = document.getElementById('result')
-            status.textContent = weatherData.current_weather.temperature;
-            status.textContent = weatherData.current_weather.windspeed;
+            const status = document.getElementById('status')
+            const result = document.getElementById('result')
+            const temp = weatherData.current_weather.temperature;
+            const wind = weatherData.current_weather.windspeed;
+            const weatherCode = weatherData.current_weather.weathercode;
+            //const humidity = weatherData.current.relative_humidity_2m;
+            //const feelsLike = weatherData.current.apparent_temperature;
+            result.textContent = `Temperature: ${temp}°C `;
+            status.textContent = `Wind Speed: ${wind} km/h | weather :${weatherCondition(weatherCode)} `;
             console.log(weatherData)
         }
     </script>
 </body>
+
 </html>
